@@ -3,14 +3,17 @@ from pathlib import Path
 
 from recipes.constants import PAGE_SIZE
 
+from django.core.management.utils import get_random_secret_key
+from dotenv import load_dotenv
+
+load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
-SECRET_KEY = 'django-insecure-+&iz7*wcbu8-t0#i6*@opv6_@!b+f6piz$+g6!*@vyuyys7jy@'
+DEBUG = os.getenv("DEBUG", 'False').lower() == 'true'
 
-DEBUG = False
-
-ALLOWED_HOSTS = ['127.0.0.1', 'https://foodgramgigarf.ddns.net']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost, 127.0.0.1').split(', ')
 
 
 INSTALLED_APPS = [
@@ -62,8 +65,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'django'),
+        'USER': os.getenv('POSTGRES_USER', 'django'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', ''),
+        'PORT': os.getenv('DB_PORT', 5432)
     }
 }
 
