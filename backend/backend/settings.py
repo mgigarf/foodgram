@@ -1,10 +1,10 @@
 import os
 from pathlib import Path
 
-from recipes.constants import PAGE_SIZE
-
 from django.core.management.utils import get_random_secret_key
 from dotenv import load_dotenv
+
+from recipes.constants import PAGE_SIZE
 
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent

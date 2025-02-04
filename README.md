@@ -1,8 +1,8 @@
-[![Main Taski workflow](https://github.com/mgigarf/kittygram_final/actions/workflows/main.yml/badge.svg)](https://github.com/mgigarf/kittygram_final/actions/workflows/main.yml)
+[![Main Foodgram workflow](https://github.com/mgigarf/foodgram/actions/workflows/main.yml/badge.svg)](https://github.com/mgigarf/foodgram/actions/workflows/main.yml)
 
 # Описание проекта
 
-Сервис kittygram для публикации котиков.
+Сервис foodgram для публикации рецептов.
 
 # Стек
 В проекте использованы следующие библиотеки:
@@ -16,7 +16,7 @@
 # Запуск проекта
 Скачать файл docker-compose.yml из репозитория 
 ``` bash
-https://github.com/mgigarf/kittygram_final/blob/main/docker-compose.yml
+https://github.com/mgigarf/foodgram/blob/main/docker-compose.yml
 ```
 Создать файл с переменными окружения .env в корне пректа
 Список требуемых переменных:
