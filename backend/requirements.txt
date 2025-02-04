@@ -1,0 +1,6 @@
+Pillow==9.0.0
+Django==3.2.3
+djangorestframework==3.12.4
+djangorestframework-simplejwt==4.7.2
+django-filter~=23.1
+tqdm
