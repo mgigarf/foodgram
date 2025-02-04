@@ -3,7 +3,7 @@ import json
 from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 
-from backend.settings import PATH_TO_INGREDIENTS
+from foodgram_backend.settings import PATH_TO_INGREDIENTS
 from recipes.models import Ingredients
 
 
