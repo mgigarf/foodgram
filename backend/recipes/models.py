@@ -65,8 +65,7 @@ class Recipes(models.Model):
     name = models.CharField(
         max_length=MAX_RECIPE_NAME_LENGTH
     )
-    text = models.CharField(
-        max_length=100,
+    text = models.TextField(
         verbose_name='Описание'
     )
     image = models.ImageField(
