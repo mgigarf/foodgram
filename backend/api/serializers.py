@@ -113,7 +113,7 @@ class GetRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipes
-        exclude = ['short_link', 'pub_date',]
+        exclude = ['short_link', 'pub_date']
 
     def get_is_in_favorite(self, obj):
         request = self.context.get('request')
