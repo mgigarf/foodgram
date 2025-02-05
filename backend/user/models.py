@@ -8,7 +8,15 @@ from .validators import not_allowed_user_name
 
 
 class User(AbstractUser):
-    """Модель пользователя"""
+    """Модель пользователя."""
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = (
+        'username',
+        'first_name',
+        'last_name',
+        'password'
+    )
 
     username = models.CharField(
         verbose_name='Ник',
@@ -39,13 +47,6 @@ class User(AbstractUser):
         null=True,
         default=None
     )
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = (
-        'username',
-        'first_name',
-        'last_name',
-        'password'
-    )
 
     class Meta:
         ordering = ('date_joined',)
@@ -57,6 +58,8 @@ class User(AbstractUser):
 
 
 class Follow(models.Model):
+    """Модель подписок."""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -87,3 +90,6 @@ class Follow(models.Model):
         verbose_name = 'Подписчик'
         verbose_name_plural = 'Подписчики'
         default_related_name = 'following'
+
+    def __str__(self):
+        return f'Подписки {self.user}'

@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand, CommandError
 from tqdm import tqdm
 
 from foodgram_backend.settings import PATH_TO_INGREDIENTS
-from recipes.models import Ingredients
+from recipes.models import Ingredient
 
 
 class Command(BaseCommand):
@@ -17,7 +17,7 @@ class Command(BaseCommand):
 
             for ingridient in tqdm(ingredients):
                 try:
-                    Ingredients.objects.get_or_create(**ingridient)
+                    Ingredient.objects.get_or_create(**ingridient)
                 except CommandError as e:
                     raise CommandError(
                         f'При добавлении {ingridient} '

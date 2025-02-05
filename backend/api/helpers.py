@@ -8,6 +8,7 @@ from recipes.constants import PAGE_SIZE
 
 
 class Base64ImageField(serializers.ImageField):
+    """Превращаем картинку из запроса в картинку-файл."""
 
     def to_internal_value(self, data):
         """Преобразует строку base64 в ImageField."""
@@ -25,6 +26,8 @@ class ShortLink:
         return str(uuid.uuid4()).replace('-', '')[:length]
 
 
-class CustomPagination(pagination.PageNumberPagination):
+class Pagination(pagination.PageNumberPagination):
+    """Класс для пагинации."""
+
     page_size = PAGE_SIZE
     page_size_query_param = 'limit'

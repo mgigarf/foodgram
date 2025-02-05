@@ -6,7 +6,7 @@ from user.models import Follow, User
 
 @admin.register(User)
 class UserAdmin(UserAdmin):
-    """Админка пользователя"""
+    """Админка пользователя."""
 
     list_display = (
         'id',
@@ -14,15 +14,25 @@ class UserAdmin(UserAdmin):
         'email',
         'first_name',
         'last_name',
+        'get_user_following',
+        'get_user_recipes'
     )
 
     list_filter = ('username', 'email')
     search_fields = ('username', 'email')
 
+    @admin.display(description='Сколько подписчиков')
+    def get_user_following(self, object):
+        return object.following.count()
+
+    @admin.display(description='Сколько рецептов')
+    def get_user_recipes(self, object):
+        return object.recipe.count()
+
 
 @admin.register(Follow)
 class FollowAdmin(admin.ModelAdmin):
-    """Админка подписок"""
+    """Админка подписок."""
 
     list_display = (
         'id',

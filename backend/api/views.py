@@ -11,7 +11,7 @@ from rest_framework.permissions import (SAFE_METHODS, IsAuthenticated,
 from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
-from api.helpers import CustomPagination, ShortLink
+from api.helpers import Pagination, ShortLink
 from api.permissions import OwnerOrReadOnly
 from api.serializers import (CreateUserSerializer, FollowSerializer,
                              GetFollowSerializer, GetRecipeSerializer,
@@ -19,19 +19,19 @@ from api.serializers import (CreateUserSerializer, FollowSerializer,
                              ShortRecipeSerializer, TagsSerializer,
                              UserAvatarSerializer, UserSerializer)
 from recipes.constants import SHORT_LINK_MAX_POSTFIX, URL
-from recipes.models import (Favorite, Ingredients, RecipeIngredient, Recipes,
-                            ShoppingCart, Tags)
+from recipes.models import (Favorite, Ingredient, RecipeIngredient, Recipe,
+                            ShoppingCart, Tag)
 from user.models import Follow
 
 User = get_user_model()
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
-    """Вьюсет рецепта и всего что с ним связано"""
+    """Вьюсет рецепта и всего что с ним связано."""
 
-    queryset = Recipes.objects.all()
+    queryset = Recipe.objects.all()
     serializer_class = RecipesSerializer
-    pagination_class = CustomPagination
+    pagination_class = Pagination
     permission_classes = [IsAuthenticatedOrReadOnly, OwnerOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -50,7 +50,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         detail=True
     )
     def get_short_link(self, request, pk):
-        recipe = get_object_or_404(Recipes, id=pk)
+        recipe = get_object_or_404(Recipe, id=pk)
         if recipe.short_link:
             return Response(
                 {"short-link": URL + recipe.short_link},
@@ -58,7 +58,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
             )
         while True:
             short_link = ShortLink().create_short_link(SHORT_LINK_MAX_POSTFIX)
-            try_recipe = Recipes.objects.filter(short_link=short_link)
+            try_recipe = Recipe.objects.filter(short_link=short_link)
             if not try_recipe:
                 break
         recipe.short_link = short_link
@@ -73,7 +73,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def add_to_favorite(self, request, pk):
-        recipe = get_object_or_404(Recipes, id=pk)
+        recipe = get_object_or_404(Recipe, id=pk)
         if request.method == 'POST':
             if Favorite.objects.filter(
                     user=request.user,
@@ -102,7 +102,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def add_to_shopping_cart(self, request, pk):
-        recipe = get_object_or_404(Recipes, id=pk)
+        recipe = get_object_or_404(Recipe, id=pk)
         if request.method == 'POST':
             if ShoppingCart.objects.filter(
                     user=request.user,
@@ -164,7 +164,7 @@ class UserViewSet(DjoserUserViewSet):
 
     queryset = User.objects.all()
     serializer_class = CreateUserSerializer
-    pagination_class = CustomPagination
+    pagination_class = Pagination
 
     def get_serializer_class(self):
         if (
@@ -253,7 +253,7 @@ class UserViewSet(DjoserUserViewSet):
         following_users = User.objects.filter(following__user=user)
         if limit:
             following_users = following_users[:int(limit)]
-        paginator = CustomPagination()
+        paginator = Pagination()
         result_page = paginator.paginate_queryset(following_users, request)
         serializer = GetFollowSerializer(
             result_page,
@@ -264,17 +264,17 @@ class UserViewSet(DjoserUserViewSet):
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
-    """Вьюсет тэгов"""
+    """Вьюсет тэгов."""
 
-    queryset = Tags.objects.all()
+    queryset = Tag.objects.all()
     serializer_class = TagsSerializer
     pagination_class = None
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    """Вьюсет ингридиентов"""
+    """Вьюсет ингридиентов."""
 
-    queryset = Ingredients.objects.all()
+    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientFilter
@@ -282,7 +282,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 def redirect_to_recipe_detail(request, short_link_code):
-    recipe = get_object_or_404(Recipes, short_link=short_link_code)
+    recipe = get_object_or_404(Recipe, short_link=short_link_code)
     return redirect(
         'api:recipe-detail',
         pk=recipe.id

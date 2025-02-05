@@ -10,8 +10,8 @@ from recipes.constants import (MAX_RECIPE_NAME_LENGTH, MAX_VIEW_LENGTH,
 User = get_user_model()
 
 
-class Tags(models.Model):
-    """Модель тэгов"""
+class Tag(models.Model):
+    """Модель тэгов."""
 
     name = models.CharField(
         verbose_name='Имя тэга',
@@ -33,8 +33,8 @@ class Tags(models.Model):
         return self.name[:MAX_VIEW_LENGTH]
 
 
-class Ingredients(models.Model):
-    """Модель ингредиентов"""
+class Ingredient(models.Model):
+    """Модель ингредиентов."""
 
     name = models.CharField(
         verbose_name='Наименование ингридиента',
@@ -54,8 +54,8 @@ class Ingredients(models.Model):
         return self.name[:MAX_VIEW_LENGTH]
 
 
-class Recipes(models.Model):
-    """ Модель рецептов """
+class Recipe(models.Model):
+    """ Модель рецептов."""
 
     author = models.ForeignKey(
         User,
@@ -82,12 +82,12 @@ class Recipes(models.Model):
         db_index=True
     )
     ingredients = models.ManyToManyField(
-        Ingredients,
+        Ingredient,
         verbose_name='Ингредиенты',
         through='RecipeIngredient'
     )
     tags = models.ManyToManyField(
-        Tags,
+        Tag,
         verbose_name='Тэги',
         through='RecipeTag'
     )
@@ -110,15 +110,15 @@ class Recipes(models.Model):
 
 
 class RecipeIngredient(models.Model):
-    """Модель ингридиентов для рецепта"""
+    """Модель ингридиентов для рецепта."""
 
     recipe = models.ForeignKey(
-        Recipes,
+        Recipe,
         on_delete=models.CASCADE,
         verbose_name='Рецепт'
     )
     ingredient = models.ForeignKey(
-        Ingredients,
+        Ingredient,
         on_delete=models.CASCADE,
         verbose_name='Ингредиент'
     )
@@ -140,15 +140,15 @@ class RecipeIngredient(models.Model):
 
 
 class RecipeTag(models.Model):
-    """Модель тэгов для рецепта"""
+    """Модель тэгов для рецепта."""
 
     recipe = models.ForeignKey(
-        Recipes,
+        Recipe,
         on_delete=models.CASCADE,
         verbose_name='Рецепт'
     )
     tag = models.ForeignKey(
-        Tags,
+        Tag,
         on_delete=models.CASCADE,
         verbose_name='Тэг'
     )
@@ -160,7 +160,7 @@ class RecipeTag(models.Model):
 
 
 class BaseFavoriteShoppingCart(models.Model):
-    """Базовая модель для избранного и корзины"""
+    """Базовая модель для избранного и корзины."""
 
     user = models.ForeignKey(
         User,
@@ -168,7 +168,7 @@ class BaseFavoriteShoppingCart(models.Model):
         verbose_name='Автор'
     )
     recipe = models.ForeignKey(
-        Recipes,
+        Recipe,
         on_delete=models.CASCADE,
         verbose_name='Рецепт',
     )
@@ -190,7 +190,7 @@ class BaseFavoriteShoppingCart(models.Model):
 
 
 class Favorite(BaseFavoriteShoppingCart):
-    """Избранные рецепты"""
+    """Избранные рецепты."""
 
     class Meta:
         default_related_name = 'user_favorite'
@@ -202,7 +202,7 @@ class Favorite(BaseFavoriteShoppingCart):
 
 
 class ShoppingCart(BaseFavoriteShoppingCart):
-    """Корзина заказов"""
+    """Корзина заказов."""
 
     class Meta:
         default_related_name = 'cart_recipes'

@@ -2,8 +2,8 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from api.helpers import Base64ImageField
-from recipes.models import (Favorite, Ingredients, RecipeIngredient, Recipes,
-                            RecipeTag, Tags)
+from recipes.models import (Favorite, Ingredient, RecipeIngredient, Recipe,
+                            RecipeTag, Tag)
 from user.constants import MAX_USER_NAME_LENGTH, MIN_PASSWORD_LENGTH
 from user.models import Follow, User
 
@@ -39,15 +39,15 @@ class TagsSerializer(serializers.ModelSerializer):
     """Сериализатор для тэгов"""
 
     class Meta:
-        model = Tags
+        model = Tag
         fields = '__all__'
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    """Сериализатор для ингредиентов"""
+    """Сериализатор для ингредиентов."""
 
     class Meta:
-        model = Ingredients
+        model = Ingredient
         fields = '__all__'
 
 
@@ -55,7 +55,7 @@ class CreateRecipeIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор создания связи Рецепт/Ингридиент."""
 
     id = serializers.PrimaryKeyRelatedField(
-        queryset=Ingredients.objects.all(),
+        queryset=Ingredient.objects.all(),
         source='ingredient'
     )
 
@@ -65,10 +65,10 @@ class CreateRecipeIngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
-    """Сериализатор для получение ингридиентов рецепта"""
+    """Сериализатор для получение ингридиентов рецепта."""
 
     id = serializers.PrimaryKeyRelatedField(
-        queryset=Ingredients.objects.all(),
+        queryset=Ingredient.objects.all(),
         source='ingredient'
     )
     measurement_unit = serializers.CharField(
@@ -82,10 +82,10 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeTagSerializer(serializers.ModelSerializer):
-    """Сериализатор для получение тэгов рецепта"""
+    """Сериализатор для получение тэгов рецепта."""
 
     id = serializers.PrimaryKeyRelatedField(
-        queryset=Tags.objects.all(),
+        queryset=Tag.objects.all(),
         source='tag'
     )
     name = serializers.CharField(source='tag.name')
@@ -97,7 +97,7 @@ class RecipeTagSerializer(serializers.ModelSerializer):
 
 
 class GetRecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для получения рецепта"""
+    """Сериализатор для получения рецепта."""
 
     ingredients = RecipeIngredientSerializer(
         read_only=True, many=True, source='recipe_ingredients'
@@ -112,7 +112,7 @@ class GetRecipeSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Recipes
+        model = Recipe
         exclude = ['short_link', 'pub_date']
 
     def get_is_in_favorite(self, obj):
@@ -127,7 +127,7 @@ class GetRecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipesSerializer(serializers.ModelSerializer):
-    """Сериализатор для создания рецепта"""
+    """Сериализатор для создания рецепта."""
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True
@@ -138,7 +138,7 @@ class RecipesSerializer(serializers.ModelSerializer):
         source='recipe_ingredients'
     )
     tags = serializers.PrimaryKeyRelatedField(
-        queryset=Tags.objects.all(), many=True
+        queryset=Tag.objects.all(), many=True
     )
     is_favorited = serializers.SerializerMethodField(
         method_name='get_is_favorited'
@@ -148,7 +148,7 @@ class RecipesSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Recipes
+        model = Recipe
         fields = '__all__'
 
     def validate(self, attrs):
@@ -178,7 +178,7 @@ class RecipesSerializer(serializers.ModelSerializer):
     def create(self, value):
         ingredients = value.pop('recipe_ingredients')
         tags = value.pop('tags')
-        recipe = Recipes.objects.create(**value)
+        recipe = Recipe.objects.create(**value)
         recipe_ingredients = [
             RecipeIngredient(recipe=recipe, **ingredient)
             for ingredient in ingredients
@@ -218,7 +218,7 @@ class RecipesSerializer(serializers.ModelSerializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    """Сериализатор для избранного"""
+    """Сериализатор для избранного."""
 
     class Meta:
         model = Favorite
@@ -259,7 +259,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
 
 class UserAvatarSerializer(serializers.ModelSerializer):
-    """Сериализатор для добавления аватара пользователю"""
+    """Сериализатор для добавления аватара пользователю."""
 
     avatar = Base64ImageField()
 
@@ -269,7 +269,7 @@ class UserAvatarSerializer(serializers.ModelSerializer):
 
 
 class GetFollowSerializer(serializers.ModelSerializer):
-    """Сериализатор для получения информации о подписках"""
+    """Сериализатор для получения информации о подписках."""
 
     recipes = serializers.SerializerMethodField(
         method_name='get_recipe'
@@ -309,7 +309,7 @@ class GetFollowSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    """Сериализатор для создания подписок"""
+    """Сериализатор для создания подписок."""
 
     class Meta:
         validators = [
@@ -345,17 +345,17 @@ class FollowSerializer(serializers.ModelSerializer):
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для получения короткой версии рецепта"""
+    """Сериализатор для получения короткой версии рецепта."""
 
     image = Base64ImageField()
 
     class Meta:
-        model = Recipes
+        model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class ShoppingCart(serializers.ModelSerializer):
-    """Сериализатор для корзины"""
+    """Сериализатор для корзины."""
 
     user = serializers.SlugRelatedField(
         slug_field='username',

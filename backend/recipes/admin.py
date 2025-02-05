@@ -1,10 +1,26 @@
 from django.contrib import admin
 
-from recipes.models import (Favorite, Ingredients, RecipeIngredient, Recipes,
-                            RecipeTag, ShoppingCart, Tags)
+from recipes.models import (Favorite, Ingredient, RecipeIngredient, Recipe,
+                            RecipeTag, ShoppingCart, Tag)
 
 
-@admin.register(Recipes)
+class IngredientsInline(admin.TabularInline):
+    """Инлайн для ингредиентов."""
+
+    model = RecipeIngredient
+    min_num = 1
+    extra = 0
+
+
+class TagsInline(admin.TabularInline):
+    """Инлайн для тэгов."""
+
+    model = RecipeTag
+    min_num = 1
+    extra = 0
+
+
+@admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     """Админка рецептов"""
 
@@ -25,6 +41,7 @@ class RecipeAdmin(admin.ModelAdmin):
     )
     list_filter = ('name', 'tags',)
     filter_horizontal = ('tags',)
+    inlines = [IngredientsInline, TagsInline]
 
     @admin.display(description='Автор')
     def get_username(self, object):
@@ -47,7 +64,7 @@ class RecipeAdmin(admin.ModelAdmin):
         return object.user_favorite.count()
 
 
-@admin.register(Ingredients)
+@admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     """Админка Ингридиента."""
 
@@ -82,8 +99,8 @@ class FavoriteAdmin(admin.ModelAdmin):
         'recipe',
     )
 
-    search_fields = ('user', 'recipe')
-    list_filter = ('user', 'recipe')
+    search_fields = ('user__username', 'recipe__name')
+    list_filter = ('user__username', 'recipe__name')
 
 
 @admin.register(ShoppingCart)
@@ -102,11 +119,11 @@ class ShoppingCartAdmin(admin.ModelAdmin):
         'recipe',
     )
 
-    search_fields = ('user', 'recipe')
-    list_filter = ('user', 'recipe')
+    search_fields = ('user__username', 'recipe__name')
+    list_filter = ('user__username', 'recipe__name')
 
 
-@admin.register(Tags)
+@admin.register(Tag)
 class TagsAdmin(admin.ModelAdmin):
     """Админка Тэгов."""
 
@@ -143,8 +160,8 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
     )
 
     search_fields = (
-        'recipe',
-        'ingredient',
+        'recipe__name',
+        'ingredient__name',
     )
     list_filter = (
         'recipe',
@@ -166,8 +183,8 @@ class RecipeTagAdmin(admin.ModelAdmin):
         'tag',
     )
     search_fields = (
-        'recipe',
-        'tag',
+        'recipe__name',
+        'tag__name',
     )
     list_filter = (
         'recipe',
