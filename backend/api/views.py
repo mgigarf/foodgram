@@ -16,7 +16,7 @@ from api.permissions import OwnerOrReadOnly
 from api.serializers import (CreateUserSerializer, FollowSerializer,
                              GetFollowSerializer, GetRecipeSerializer,
                              IngredientSerializer, RecipesSerializer,
-                             ShortRecipeSerializer, TagsSerializer,
+                             ShortRecipeSerializer, TagSerializer,
                              UserAvatarSerializer, UserSerializer)
 from recipes.constants import SHORT_LINK_MAX_POSTFIX, URL
 from recipes.models import (Favorite, Ingredient, RecipeIngredient, Recipe,
@@ -267,7 +267,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет тэгов."""
 
     queryset = Tag.objects.all()
-    serializer_class = TagsSerializer
+    serializer_class = TagSerializer
     pagination_class = None
 
 

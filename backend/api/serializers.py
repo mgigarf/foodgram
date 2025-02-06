@@ -35,7 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
         ).exists()
 
 
-class TagsSerializer(serializers.ModelSerializer):
+class TagSerializer(serializers.ModelSerializer):
     """Сериализатор для тэгов"""
 
     class Meta:
@@ -81,28 +81,13 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         fields = ['id', 'amount', 'measurement_unit', 'name']
 
 
-class RecipeTagSerializer(serializers.ModelSerializer):
-    """Сериализатор для получение тэгов рецепта."""
-
-    id = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(),
-        source='tag'
-    )
-    name = serializers.CharField(source='tag.name')
-    slug = serializers.CharField(source='tag.slug')
-
-    class Meta:
-        model = RecipeTag
-        fields = ['id', 'name', 'slug']
-
-
 class GetRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для получения рецепта."""
 
     ingredients = RecipeIngredientSerializer(
         read_only=True, many=True, source='recipe_ingredients'
     )
-    tags = RecipeTagSerializer(read_only=True, many=True, source='recipe_tags')
+    tags = TagSerializer(read_only=True, many=True)
     author = UserSerializer(read_only=True)
     is_favorited = serializers.SerializerMethodField(
         method_name='get_is_in_favorite'
@@ -128,6 +113,7 @@ class GetRecipeSerializer(serializers.ModelSerializer):
 
 class RecipesSerializer(serializers.ModelSerializer):
     """Сериализатор для создания рецепта."""
+
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True
