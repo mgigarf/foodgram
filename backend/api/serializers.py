@@ -3,7 +3,7 @@ from rest_framework.validators import UniqueTogetherValidator
 
 from api.helpers import Base64ImageField
 from recipes.models import (Favorite, Ingredient, RecipeIngredient, Recipe,
-                            RecipeTag, Tag)
+                            Tag, ShoppingCart)
 from user.constants import MAX_USER_NAME_LENGTH, MIN_PASSWORD_LENGTH
 from user.models import Follow, User
 
@@ -126,12 +126,6 @@ class RecipesSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True
     )
-    is_favorited = serializers.SerializerMethodField(
-        method_name='get_is_favorited'
-    )
-    is_in_shopping_cart = serializers.SerializerMethodField(
-        method_name='get_is_in_shopping_cart'
-    )
 
     class Meta:
         model = Recipe
@@ -192,24 +186,6 @@ class RecipesSerializer(serializers.ModelSerializer):
             context={'request': self.context.get('request')}
         ).data
 
-    def get_is_favorited(self, obj):
-        request = self.context.get('request')
-        return (request and request.user.is_authenticated
-                and request.user.favorite_recipes.filter(recipe=obj).exists())
-
-    def get_is_in_shopping_cart(self, obj):
-        request = self.context.get('request')
-        return (request and request.user.is_authenticated
-                and request.user.cart_recipes.filter(recipe=obj).exists())
-
-
-class FavoriteSerializer(serializers.ModelSerializer):
-    """Сериализатор для избранного."""
-
-    class Meta:
-        model = Favorite
-        fields = '__all__'
-
 
 class CreateUserSerializer(serializers.ModelSerializer):
     """Сериализатор регистрации пользователя."""
@@ -254,7 +230,7 @@ class UserAvatarSerializer(serializers.ModelSerializer):
         fields = ('avatar',)
 
 
-class GetFollowSerializer(serializers.ModelSerializer):
+class GetFollowSerializer(UserSerializer):
     """Сериализатор для получения информации о подписках."""
 
     recipes = serializers.SerializerMethodField(
@@ -263,9 +239,6 @@ class GetFollowSerializer(serializers.ModelSerializer):
 
     recipes_count = serializers.SerializerMethodField(
         method_name='get_recipes_count'
-    )
-    is_subscribed = serializers.SerializerMethodField(
-        method_name='get_is_subscribed'
     )
 
     class Meta:
@@ -298,14 +271,8 @@ class FollowSerializer(serializers.ModelSerializer):
     """Сериализатор для создания подписок."""
 
     class Meta:
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Follow.objects.all(),
-                fields=('user', 'following')
-            )
-        ]
         model = Follow
-        fields = '__all__'
+        fields = ('user', 'following')
 
     def validate(self, attrs):
         follower = attrs['user']
@@ -340,10 +307,39 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
-class ShoppingCart(serializers.ModelSerializer):
+class ShoppingCartSerializer(serializers.ModelSerializer):
     """Сериализатор для корзины."""
 
-    user = serializers.SlugRelatedField(
-        slug_field='username',
-        read_only=True
-    )
+    class Meta:
+        model = ShoppingCart
+        fields = ('user', 'recipe')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=ShoppingCart.objects.all(),
+                fields=('user', 'recipe')
+            )
+        ]
+
+    def to_representation(self, instance):
+        return ShortRecipeSerializer(
+            instance.recipe
+        ).data
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    """Сериализатор для избранного."""
+
+    class Meta:
+        model = Favorite
+        fields = ('user', 'recipe')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Favorite.objects.all(),
+                fields=('user', 'recipe')
+            )
+        ]
+
+    def to_representation(self, instance):
+        return ShortRecipeSerializer(
+            instance.recipe
+        ).data

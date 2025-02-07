@@ -1,21 +1,13 @@
 from django.contrib import admin
 
 from recipes.models import (Favorite, Ingredient, RecipeIngredient, Recipe,
-                            RecipeTag, ShoppingCart, Tag)
+                            ShoppingCart, Tag)
 
 
 class IngredientsInline(admin.TabularInline):
     """Инлайн для ингредиентов."""
 
     model = RecipeIngredient
-    min_num = 1
-    extra = 0
-
-
-class TagsInline(admin.TabularInline):
-    """Инлайн для тэгов."""
-
-    model = RecipeTag
     min_num = 1
     extra = 0
 
@@ -41,7 +33,7 @@ class RecipeAdmin(admin.ModelAdmin):
     )
     list_filter = ('name', 'tags',)
     filter_horizontal = ('tags',)
-    inlines = [IngredientsInline, TagsInline]
+    inlines = [IngredientsInline]
 
     @admin.display(description='Автор')
     def get_username(self, object):
@@ -56,7 +48,7 @@ class RecipeAdmin(admin.ModelAdmin):
     @admin.display(description='Тэги')
     def get_tags(self, object):
         return '\n'.join(
-            obj.tag.name for obj in object.recipe_tags.all()
+            obj.name for obj in object.tags.all()
         )
 
     @admin.display(description='Сколько раз добавили в избранное')
@@ -166,29 +158,6 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
     list_filter = (
         'recipe',
         'ingredient',
-    )
-
-
-@admin.register(RecipeTag)
-class RecipeTagAdmin(admin.ModelAdmin):
-    """Админка Рецепто-тжгов."""
-
-    list_display = (
-        'id',
-        'recipe',
-        'tag',
-    )
-    list_editable = (
-        'recipe',
-        'tag',
-    )
-    search_fields = (
-        'recipe__name',
-        'tag__name',
-    )
-    list_filter = (
-        'recipe',
-        'tag',
     )
 
 

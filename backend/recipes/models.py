@@ -49,6 +49,7 @@ class Ingredient(models.Model):
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
         ordering = ('name',)
+        default_related_name = 'tags'
 
     def __str__(self):
         return self.name[:MAX_VIEW_LENGTH]
@@ -89,7 +90,7 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(
         Tag,
         verbose_name='Тэги',
-        through='RecipeTag'
+        related_name='recipes'
     )
     short_link = models.CharField(
         verbose_name='Короткая ссылка',
@@ -138,25 +139,8 @@ class RecipeIngredient(models.Model):
         verbose_name = 'Ингредиент Рецепта'
         verbose_name_plural = 'Ингредиенты Рецептов'
 
-
-class RecipeTag(models.Model):
-    """Модель тэгов для рецепта."""
-
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Рецепт'
-    )
-    tag = models.ForeignKey(
-        Tag,
-        on_delete=models.CASCADE,
-        verbose_name='Тэг'
-    )
-
-    class Meta:
-        default_related_name = 'recipe_tags'
-        verbose_name = 'Тэг рецепта'
-        verbose_name_plural = 'Тэги рецептов'
+    def __str__(self):
+        return f'Ингредиенты рецепта {self.recipe.name[:MAX_VIEW_LENGTH]}'
 
 
 class BaseFavoriteShoppingCart(models.Model):
