@@ -6,14 +6,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import (SAFE_METHODS, IsAuthenticated,
+from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.helpers import Pagination, ShortLink
 from api.permissions import OwnerOrReadOnly
-from .serializers import (
+from api.serializers import (
     CreateUserSerializer, FollowSerializer,
     GetFollowSerializer, ShoppingCartSerializer,
     IngredientSerializer, RecipesSerializer,
@@ -108,8 +108,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 'ingredient__measurement_unit'
             ).annotate(total_amount=Sum('amount')).order_by('ingredient__name')
         )
-        shopping_list_text = self.prepsre_recipes_to_dl(shopping_cart_ingredients)
-        return self.dl_shopping_list(shopping_list_text)
+        shopping_list = self.prepsre_recipes_to_dl(shopping_cart_ingredients)
+        return self.dl_shopping_list(shopping_list)
 
     def prepsre_recipes_to_dl(self, ingredients):
         shopping_list = []
