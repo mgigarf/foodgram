@@ -13,18 +13,15 @@ from rest_framework.response import Response
 from api.filters import IngredientFilter, RecipeFilter
 from api.helpers import Pagination, ShortLink
 from api.permissions import OwnerOrReadOnly
-from api.serializers import (
-    CreateUserSerializer, FollowSerializer,
-    GetFollowSerializer, ShoppingCartSerializer,
-    IngredientSerializer, RecipesSerializer,
-    ShortRecipeSerializer, TagSerializer,
-    UserAvatarSerializer, UserSerializer,
-    FavoriteSerializer
-)
+from api.serializers import (CreateUserSerializer, FavoriteSerializer,
+                             FollowSerializer, GetFollowSerializer,
+                             IngredientSerializer, RecipesSerializer,
+                             ShoppingCartSerializer, ShortRecipeSerializer,
+                             TagSerializer, UserAvatarSerializer,
+                             UserSerializer)
 from recipes.constants import SHORT_LINK_MAX_POSTFIX, URL
-from recipes.models import (
-    Favorite, Ingredient, RecipeIngredient, Recipe, ShoppingCart, Tag
-)
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
 from user.models import Follow
 
 User = get_user_model()

@@ -2,8 +2,8 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from api.helpers import Base64ImageField
-from recipes.models import (Favorite, Ingredient, RecipeIngredient, Recipe,
-                            Tag, ShoppingCart)
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
 from user.constants import MAX_USER_NAME_LENGTH, MIN_PASSWORD_LENGTH
 from user.models import Follow, User
 
