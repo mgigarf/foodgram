@@ -156,20 +156,26 @@ class RecipesSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, value):
-        ingredients = value.pop('recipe_ingredients')
-        tags = value.pop('tags')
-        recipe = Recipe.objects.create(**value)
-        recipe_ingredients = [
-            RecipeIngredient(recipe=recipe, **ingredient)
-            for ingredient in ingredients
-        ]
-        RecipeIngredient.objects.bulk_create(recipe_ingredients)
-        recipe.tags.set(tags)
+        recipe, value = self.add_or_update_recipe_ingredients_tags(value)
         return recipe
 
     def update(self, recipe, value):
+        recipe, value = self.add_or_update_recipe_ingredients_tags(
+            value, recipe
+        )
+        return super().update(recipe, value)
+
+    def to_representation(self, instance):
+        return GetRecipeSerializer(
+            instance,
+            context={'request': self.context.get('request')}
+        ).data
+
+    def add_or_update_recipe_ingredients_tags(self, value, recipe=None):
         ingredients = value.pop('recipe_ingredients')
         tags = value.pop('tags')
+        if not recipe:
+            recipe = Recipe.objects.create(**value)
         recipe.recipe_ingredients.all().delete()
         recipe.tags.clear()
         recipe_ingredients = [
@@ -178,13 +184,7 @@ class RecipesSerializer(serializers.ModelSerializer):
         ]
         RecipeIngredient.objects.bulk_create(recipe_ingredients)
         recipe.tags.set(tags)
-        return super().update(recipe, value)
-
-    def to_representation(self, instance):
-        return GetRecipeSerializer(
-            instance,
-            context={'request': self.context.get('request')}
-        ).data
+        return recipe, value
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -266,6 +266,19 @@ class GetFollowSerializer(UserSerializer):
         return (request and request.user.is_authenticated
                 and request.user.following.filter(following=user).exists())
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        request = self.context.get('request')
+        limit = request.query_params.get('recipes_limit')
+        recipes = instance.recipes.all()
+        if limit and limit.isdigit():
+            recipes = recipes[:int(limit)]
+        representation['recipes'] = ShortRecipeSerializer(
+            recipes, context={'request': request}, many=True
+        ).data
+        representation['recipes_count'] = recipes.count()
+        return representation
+
 
 class FollowSerializer(serializers.ModelSerializer):
     """Сериализатор для создания подписок."""
@@ -293,7 +306,7 @@ class FollowSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         request = self.context.get('request')
         return GetFollowSerializer(
-            instance.author, context={'request': request}
+            instance.following, context={'request': request}
         ).data
 
 

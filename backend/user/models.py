@@ -92,4 +92,4 @@ class Follow(models.Model):
         default_related_name = 'following'
 
     def __str__(self):
-        return f'Подписки {self.user}'
+        return f'Подписки {self.user} на {self.following}'

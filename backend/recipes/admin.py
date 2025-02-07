@@ -130,8 +130,8 @@ class TagsAdmin(admin.ModelAdmin):
         'slug',
     )
 
-    search_fields = ('name', )
-    list_filter = ('name', )
+    search_fields = ('name',)
+    list_filter = ('name',)
 
 
 @admin.register(RecipeIngredient)

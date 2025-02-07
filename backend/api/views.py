@@ -16,9 +16,8 @@ from api.permissions import OwnerOrReadOnly
 from api.serializers import (CreateUserSerializer, FavoriteSerializer,
                              FollowSerializer, GetFollowSerializer,
                              IngredientSerializer, RecipesSerializer,
-                             ShoppingCartSerializer, ShortRecipeSerializer,
-                             TagSerializer, UserAvatarSerializer,
-                             UserSerializer)
+                             ShoppingCartSerializer, TagSerializer,
+                             UserAvatarSerializer, UserSerializer)
 from recipes.constants import SHORT_LINK_MAX_POSTFIX, URL
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
@@ -205,23 +204,12 @@ class UserViewSet(DjoserUserViewSet):
         following = get_object_or_404(User, pk=id)
         if request.method == 'POST':
             serializer = FollowSerializer(
-                data={'user': user.id, 'following': following.id}
+                data={'user': user.id, 'following': following.id},
+                context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            limit = request.query_params.get('recipes_limit')
-            recipes = following.recipes.all()
-            if limit:
-                recipes = recipes[:int(limit)]
-            user_data = UserSerializer(
-                following,
-                context={'request': request}
-            ).data
-            user_data['recipes'] = ShortRecipeSerializer(
-                recipes, context={'request': request}, many=True
-            ).data
-            user_data['recipes_count'] = len(user_data['recipes'])
-            return Response(user_data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         follow = Follow.objects.filter(
             user=user.id,
             following=following.id
